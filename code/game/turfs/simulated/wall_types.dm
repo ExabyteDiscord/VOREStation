@@ -106,7 +106,7 @@
 	name = "autojoin wall"
 	icon_state = "light"
 	opacity = 1
-	density = 1
+	density = TRUE
 	blocks_air = 1
 
 	var/base_state = "light" //The base iconstate to base sprites on
@@ -156,7 +156,12 @@
 	light_range = 3
 	light_power = 0.75
 	light_color = "#ff0066" // Pink-ish
+	light_on = TRUE
 	block_tele = TRUE // Will be used for dungeons so this is needed to stop cheesing with handteles.
+
+/turf/simulated/shuttle/wall/alien/Initialize()
+	. = ..()
+	update_light()
 
 /turf/simulated/shuttle/wall/alien/hard_corner
 	name = "hardcorner wall"
@@ -262,3 +267,151 @@
 		var/image/I = image(icon = src.icon, icon_state = "o_[icon_state]")
 		I.color = stripe_color
 		add_overlay(I)
+
+// Fake corners for making hulls look pretty
+/obj/structure/hull_corner
+	name = "hull corner"
+	plane = OBJ_PLANE - 1
+	
+	icon = 'icons/turf/wall_masks.dmi'
+	icon_state = "hull_corner"
+	
+	anchored = TRUE
+	density = TRUE
+	breakable = TRUE
+
+/obj/structure/hull_corner/Initialize()
+	return INITIALIZE_HINT_LATELOAD
+
+/obj/structure/hull_corner/LateInitialize()
+	. = ..()
+	update_look()
+
+/obj/structure/hull_corner/proc/get_dirs_to_test()
+	return list(dir, turn(dir,90))
+
+/obj/structure/hull_corner/proc/update_look()
+	cut_overlays()
+	
+	var/turf/simulated/wall/T
+	for(var/direction in get_dirs_to_test())
+		T = get_step(src, direction)
+		if(!istype(T))
+			continue
+		
+		name = T.name
+		desc = T.desc
+		
+		var/datum/material/B = T.material
+		var/datum/material/R = T.reinf_material
+		
+		if(B?.icon_colour)
+			color = B.icon_colour
+		if(R?.icon_colour)
+			var/image/I = image(icon, icon_state+"_reinf", dir=dir)
+			I.color = R.icon_colour
+			add_overlay(I)
+		break
+	
+	if(!T)
+		warning("Hull corner at [x],[y] not placed adjacent to a hull it can find.")
+
+/obj/structure/hull_corner/long_vert
+	icon = 'icons/turf/wall_masks32x64.dmi'
+	bound_height = 64
+
+/obj/structure/hull_corner/long_vert/get_dirs_to_test()
+	return list(dir, turn(dir,90), turn(dir,-90))
+
+/obj/structure/hull_corner/long_horiz
+	icon = 'icons/turf/wall_masks64x32.dmi'
+	bound_width = 64
+
+/obj/structure/hull_corner/long_horiz/get_dirs_to_test()
+	return list(dir, turn(dir,90), turn(dir,-90))
+
+
+
+// Eris walls
+/turf/simulated/wall/eris
+	icon = 'icons/turf/wall_masks_eris.dmi'
+	icon_state = "generic"
+	wall_masks = 'icons/turf/wall_masks_eris.dmi'
+	var/list/blend_objects = list(/obj/machinery/door)
+	var/list/noblend_objects = list(/obj/machinery/door/window, /obj/machinery/door/firedoor)
+
+/turf/simulated/wall/eris/can_join_with_low_wall(var/obj/structure/low_wall/WF)
+	return istype(WF, /obj/structure/low_wall/eris)
+/turf/simulated/wall/eris/special_wall_connections(list/dirs, list/inrange)
+	..()
+	for(var/direction in cardinal)
+		var/turf/T = get_step(src, direction)
+		var/decided_to_blend = FALSE
+		blend_obj_loop:
+			for(var/obj/O in T)
+				for(var/b_type in blend_objects)
+					if(istype(O, b_type))
+						decided_to_blend = TRUE
+						for(var/obj/structure/S in T)
+							if(istype(S, src))
+								decided_to_blend = FALSE
+						for(var/nb_type in noblend_objects)
+							if(istype(O, nb_type))
+								decided_to_blend = FALSE
+
+					if(decided_to_blend)
+						dirs += direction
+						break blend_obj_loop // breaks outer loop
+
+/turf/simulated/wall/eris/r_wall
+	icon_state = "rgeneric"
+/turf/simulated/wall/eris/r_wall/Initialize(mapload)
+	. = ..(mapload, "plasteel","plasteel")
+
+// Bay walls
+/turf/simulated/wall/bay
+	icon = 'icons/turf/wall_masks_bay.dmi'
+	icon_state = "generic"
+	wall_masks = 'icons/turf/wall_masks_bay.dmi'
+	var/list/blend_objects = list(/obj/machinery/door)
+	var/list/noblend_objects = list(/obj/machinery/door/window, /obj/machinery/door/firedoor)
+
+	var/stripe_color // Adds a colored stripe to the walls
+
+/turf/simulated/wall/bay/can_join_with_low_wall(var/obj/structure/low_wall/WF)
+	return istype(WF, /obj/structure/low_wall/bay)
+
+/turf/simulated/wall/bay/update_icon()
+	. = ..()
+	if(stripe_color)
+		var/image/I
+		for(var/i = 1 to 4)
+			I = image(wall_masks, "stripe[wall_connections[i]]", dir = 1<<(i-1))
+			I.color = stripe_color
+			add_overlay(I)
+
+/turf/simulated/wall/bay/special_wall_connections(list/dirs, list/inrange)
+	..()
+	for(var/direction in cardinal)
+		var/turf/T = get_step(src, direction)
+		var/decided_to_blend = FALSE
+		blend_obj_loop:
+			for(var/obj/O in T)
+				for(var/b_type in blend_objects)
+					if(istype(O, b_type))
+						decided_to_blend = TRUE
+						for(var/obj/structure/S in T)
+							if(istype(S, src))
+								decided_to_blend = FALSE
+						for(var/nb_type in noblend_objects)
+							if(istype(O, nb_type))
+								decided_to_blend = FALSE
+
+					if(decided_to_blend)
+						dirs += direction
+						break blend_obj_loop // breaks outer loop
+
+/turf/simulated/wall/bay/r_wall
+	icon_state = "rgeneric"
+/turf/simulated/wall/bay/r_wall/Initialize(mapload)
+	. = ..(mapload, "plasteel","plasteel")
