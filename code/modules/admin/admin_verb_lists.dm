@@ -107,7 +107,8 @@ var/list/admin_verbs_admin = list(
 	/client/proc/fixatmos,
 	/datum/admins/proc/sendFax,
 	/client/proc/despawn_player,
-	/datum/admins/proc/view_feedback
+	/datum/admins/proc/view_feedback,
+	/client/proc/debug_global_variables
 	)
 
 var/list/admin_verbs_ban = list(
@@ -118,7 +119,8 @@ var/list/admin_verbs_ban = list(
 var/list/admin_verbs_sounds = list(
 	/client/proc/play_local_sound,
 	/client/proc/play_sound,
-	/client/proc/play_server_sound
+	/client/proc/play_server_sound,
+	/client/proc/play_web_sound
 	)
 
 var/list/admin_verbs_fun = list(
@@ -140,6 +142,7 @@ var/list/admin_verbs_fun = list(
 	/datum/admins/proc/call_drop_pod,
 	/client/proc/smite,
 	/client/proc/admin_lightning_strike,
+	/client/proc/cmd_admin_droppod_deploy
 	)
 
 var/list/admin_verbs_spawn = list(
@@ -148,6 +151,7 @@ var/list/admin_verbs_spawn = list(
 	/datum/admins/proc/check_custom_items,
 	/datum/admins/proc/spawn_plant,
 	/datum/admins/proc/spawn_atom,		//allows us to spawn instances,
+	/client/proc/cmd_admin_droppod_spawn,
 	/client/proc/respawn_character,
 	/client/proc/virus2_editor,
 	/client/proc/spawn_chemdisp_cartridge,
@@ -184,7 +188,9 @@ var/list/admin_verbs_server = list(
 	/client/proc/recipe_dump,
 	/client/proc/panicbunker,
 	/client/proc/paranoia_logging,
-	/client/proc/ip_reputation
+	/client/proc/ip_reputation,
+	/client/proc/debug_global_variables,
+	/client/proc/dbcon_fix
 	)
 
 var/list/admin_verbs_debug = list(
@@ -232,7 +238,11 @@ var/list/admin_verbs_debug = list(
 	/datum/admins/proc/change_time,
 	/client/proc/admin_give_modifier,
 	/client/proc/simple_DPS,
-	/datum/admins/proc/view_feedback
+	/datum/admins/proc/view_feedback,
+	/client/proc/debug_global_variables,
+	/client/proc/ping_webhook,
+	/client/proc/reload_webhooks,
+	/client/proc/stop_sounds
 	)
 
 var/list/admin_verbs_paranoid_debug = list(
@@ -278,6 +288,7 @@ var/list/admin_verbs_hideable = list(
 	/client/proc/play_local_sound,
 	/client/proc/play_sound,
 	/client/proc/play_server_sound,
+	/client/proc/play_web_sound,
 	/client/proc/object_talk,
 	/datum/admins/proc/cmd_admin_dress,
 	/client/proc/cmd_admin_gib_self,
@@ -326,7 +337,9 @@ var/list/admin_verbs_hideable = list(
 	/client/proc/roll_dices,
 	/proc/possess,
 	/proc/release,
-	/datum/admins/proc/set_tcrystals
+	/datum/admins/proc/set_tcrystals,
+	/client/proc/debug_global_variables,
+	/client/proc/stop_sounds
 	)
 var/list/admin_verbs_mod = list(
 	/client/proc/cmd_admin_pm_context,	//right-click adminPM interface,
@@ -488,8 +501,8 @@ var/list/admin_verbs_event_manager = list(
 	/client/proc/cmd_admin_delete,		//delete an instance/object/mob/etc,
 	/client/proc/cmd_debug_del_all,
 	/client/proc/toggle_random_events,
-	/client/proc/modify_server_news
-
+	/client/proc/modify_server_news,
+	/client/proc/debug_global_variables
 )
 
 /client/proc/add_admin_verbs()

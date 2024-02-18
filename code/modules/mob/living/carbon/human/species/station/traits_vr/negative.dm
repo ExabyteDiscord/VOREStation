@@ -1,8 +1,5 @@
-#define ORGANICS	1
-#define SYNTHETICS	2
-
 /datum/trait/negative
-	category = -1
+	category = TRAIT_TYPE_NEGATIVE
 
 /datum/trait/negative/speed_slow
 	name = "Slowdown"
@@ -11,7 +8,7 @@
 	var_changes = list("slowdown" = 0.5)
 
 /datum/trait/negative/speed_slow_plus
-	name = "Major Slowdown"
+	name = "Slowdown, Major"
 	desc = "Allows you to move MUCH slower on average than baseline."
 	cost = -3
 	var_changes = list("slowdown" = 1.0)
@@ -23,7 +20,7 @@
 	var_changes = list("item_slowdown_mod" = 1.5)
 
 /datum/trait/negative/weakling_plus
-	name = "Major Weakling"
+	name = "Weakling, Major"
 	desc = "Allows you to carry heavy equipment with much more slowdown."
 	cost = -2
 	var_changes = list("item_slowdown_mod" = 2.0)
@@ -34,22 +31,22 @@
 	cost = -2
 	var_changes = list("total_health" = 75)
 
-	apply(var/datum/species/S,var/mob/living/carbon/human/H)
-		..(S,H)
-		H.setMaxHealth(S.total_health)
+/datum/trait/negative/endurance_low/apply(var/datum/species/S,var/mob/living/carbon/human/H)
+	..()
+	H.setMaxHealth(S.total_health)
 
 /datum/trait/negative/endurance_very_low
-	name = "Extremely Low Endurance"
+	name = "Low Endurance, Major"
 	desc = "Reduces your maximum total hitpoints to 50."
 	cost = -3 //Teshari HP. This makes the person a lot more suseptable to getting stunned, killed, etc.
 	var_changes = list("total_health" = 50)
 
-	apply(var/datum/species/S,var/mob/living/carbon/human/H)
-		..(S,H)
-		H.setMaxHealth(S.total_health)
+/datum/trait/negative/endurance_very_low/apply(var/datum/species/S,var/mob/living/carbon/human/H)
+	..()
+	H.setMaxHealth(S.total_health)
 
 /datum/trait/negative/minor_brute_weak
-	name = "Minor Brute Weakness"
+	name = "Brute Weakness, Minor"
 	desc = "Increases damage from brute damage sources by 15%"
 	cost = -1
 	var_changes = list("brute_mod" = 1.15)
@@ -61,13 +58,13 @@
 	var_changes = list("brute_mod" = 1.25)
 
 /datum/trait/negative/brute_weak_plus
-	name = "Major Brute Weakness"
+	name = "Brute Weakness, Major"
 	desc = "Increases damage from brute damage sources by 50%"
 	cost = -3
 	var_changes = list("brute_mod" = 1.5)
 
 /datum/trait/negative/minor_burn_weak
-	name = "Minor Burn Weakness"
+	name = "Burn Weakness, Minor"
 	desc = "Increases damage from burn damage sources by 15%"
 	cost = -1
 	var_changes = list("burn_mod" = 1.15)
@@ -79,7 +76,7 @@
 	var_changes = list("burn_mod" = 1.25)
 
 /datum/trait/negative/burn_weak_plus
-	name = "Major Burn Weakness"
+	name = "Burn Weakness, Major"
 	desc = "Increases damage from burn damage sources by 50%"
 	cost = -3
 	var_changes = list("burn_mod" = 1.5)
@@ -91,10 +88,12 @@
 	var_changes = list("siemens_coefficient" = 1.5) //This makes you a lot weaker to tasers.
 
 /datum/trait/negative/conductive_plus
-	name = "Major Conductive"
+	name = "Conductive, Major"
 	desc = "Increases your susceptibility to electric shocks by 100%"
 	cost = -1
 	var_changes = list("siemens_coefficient" = 2.0) //This makes you extremely weak to tasers.
+	custom_only = FALSE
+	varchange_type = TRAIT_VARCHANGE_LESS_BETTER
 
 /datum/trait/negative/haemophilia
 	name = "Haemophilia - Organics only"
@@ -102,6 +101,8 @@
 	cost = -2
 	var_changes = list("bloodloss_rate" = 2)
 	can_take = ORGANICS
+	custom_only = FALSE
+	varchange_type = TRAIT_VARCHANGE_LESS_BETTER
 
 /datum/trait/negative/hollow
 	name = "Hollow Bones/Aluminum Alloy"
@@ -109,7 +110,7 @@
 	cost = -2 //I feel like this should be higher, but let's see where it goes
 
 /datum/trait/negative/hollow/apply(var/datum/species/S,var/mob/living/carbon/human/H)
-	..(S,H)
+	..()
 	for(var/obj/item/organ/external/O in H.organs)
 		O.min_broken_damage *= 0.5
 		O.min_bruised_damage *= 0.5
@@ -119,10 +120,57 @@
 	desc = "Your light weight and poor balance make you very susceptible to unhelpful bumping. Think of it like a bowling ball versus a pin."
 	cost = -2
 	var_changes = list("lightweight" = 1)
-	
+	custom_only = FALSE
+
 /datum/trait/negative/neural_hypersensitivity
 	name = "Neural Hypersensitivity"
-	desc = "Your nerves are particularly sensitive to physical changes, leading to experiencing twice the intensity of pain and pleasure alike. Doubles traumatic shock."
+	desc = "Your nerves are particularly sensitive to physical changes, leading to experiencing twice the intensity of pain and pleasure alike. Makes all pain effects twice as strong, and occur at half as much damage."
 	cost = -1
 	var_changes = list("trauma_mod" = 2)
 	can_take = ORGANICS
+
+/datum/trait/negative/breathes
+	cost = -2
+	can_take = ORGANICS
+
+/datum/trait/negative/breathes/phoron
+	name = "Phoron Breather"
+	desc = "You breathe phoron instead of oxygen (which is poisonous to you), much like a Vox."
+	var_changes = list("breath_type" = "phoron", "poison_type" = "oxygen", "ideal_air_type" = /datum/gas_mixture/belly_air/vox)
+
+/datum/trait/negative/breathes/nitrogen
+	name = "Nitrogen Breather"
+	desc = "You breathe nitrogen instead of oxygen (which is poisonous to you). Incidentally, phoron isn't poisonous to breathe to you."
+	var_changes = list("breath_type" = "nitrogen", "poison_type" = "oxygen", "ideal_air_type" = /datum/gas_mixture/belly_air/nitrogen_breather)
+
+/datum/trait/negative/monolingual
+	name = "Monolingual"
+	desc = "You are not good at learning languages."
+	cost = -1
+	var_changes = list("num_alternate_languages" = 0)
+	var_changes_pref = list("extra_languages" = -3)
+	custom_only = FALSE
+	varchange_type = TRAIT_VARCHANGE_MORE_BETTER
+
+/datum/trait/negative/dark_blind
+	name = "Nyctalopia"
+	desc = "You cannot see in dark at all."
+	cost = -1
+	var_changes = list("darksight" = 0)
+	custom_only = FALSE
+	varchange_type = TRAIT_VARCHANGE_MORE_BETTER
+
+/datum/trait/negative/bad_shooter
+	name = "Bad Shot"
+	desc = "You are terrible at aiming."
+	cost = -1
+	var_changes = list("gun_accuracy_mod" = -35)
+	custom_only = FALSE
+	varchange_type = TRAIT_VARCHANGE_MORE_BETTER
+
+/datum/trait/negative/bad_swimmer
+	name = "Bad Swimmer"
+	desc = "You can't swim very well, all water slows you down a lot and you drown in deep water."
+	cost = -1
+	custom_only = FALSE
+	var_changes = list("bad_swimmer" = 1, "water_movement" = 4)
